@@ -5,12 +5,12 @@ const destinations = [
   {
     title: 'Descubre la Magia de Galicia',
     subtitle: 'Experiencias únicas en los rincones más hermosos del noroeste de España',
-    image: 'https://images.pexels.com/photos/22191978/pexels-photo-22191978.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+    image: 'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
   },
   {
     title: 'Descubre Andalucía',
     subtitle: 'Sumérgete en la cultura, historia y tradiciones del sur de España',
-    image: 'https://images.pexels.com/photos/1388030/pexels-photo-1388030.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+    image: 'https://images.pexels.com/photos/22191978/pexels-photo-22191978.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
   },
   {
     title: 'Descubre Baleares',
