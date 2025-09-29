@@ -31,7 +31,7 @@ export default function Header() {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <img 
-              src="/public/Screenshot 2025-09-26 at 12.52.45.png" 
+              src="/public/logo.png" 
               alt="Experiencias del Destino" 
               className="h-12 w-auto"
             />
