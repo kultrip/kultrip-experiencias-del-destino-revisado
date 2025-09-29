@@ -31,7 +31,7 @@ export default function Header() {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <img 
-              src="/public/logo.png" 
+              src="https://experienciasdeldestino.com/wp-content/uploads/2019/06/Logo-EdD-NARANJA_Fondo-Blanco.png" 
               alt="Experiencias del Destino" 
               className="h-12 w-auto"
             />
