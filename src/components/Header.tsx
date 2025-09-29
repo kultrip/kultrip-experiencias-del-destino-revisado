@@ -41,6 +41,8 @@ export default function Header() {
             <a href="#" className="text-gray-700 hover:text-orange-500 font-medium">Inicio</a>
             <a href="#" className="text-gray-700 hover:text-orange-500 font-medium">Experiencias</a>
             <a href="#" className="text-gray-700 hover:text-orange-500 font-medium">Galicia</a>
+            <a href="#" className="text-gray-700 hover:text-orange-500 font-medium">Andalucía</a>
+            <a href="#" className="text-gray-700 hover:text-orange-500 font-medium">Baleares</a>
             <a href="#" className="text-gray-700 hover:text-orange-500 font-medium">Sobre Nosotros</a>
             <a href="#" className="text-gray-700 hover:text-orange-500 font-medium">Contacto</a>
           </nav>
