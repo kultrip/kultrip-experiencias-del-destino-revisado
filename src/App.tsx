@@ -34,6 +34,51 @@ function HomePage() {
     };
   }, []);
 
+  // Función para normalizar texto en español (remover acentos y convertir a minúsculas)
+  const normalizeSpanishText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD') // Descomponer caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, '') // Remover marcas de acento
+      .replace(/ñ/g, 'n') // Convertir ñ a n para búsqueda más amplia
+      .trim();
+  };
+
+  // Función para búsqueda inteligente en español con sinónimos
+  const createSpanishSearchTerms = (searchTerm: string): string[] => {
+    const normalized = normalizeSpanishText(searchTerm);
+    const terms = [normalized];
+    
+    // Sinónimos y variaciones comunes en español
+    const synonyms: { [key: string]: string[] } = {
+      'atardecer': ['puesta de sol', 'ocaso', 'sunset'],
+      'comida': ['gastronomia', 'gastronomica', 'culinaria', 'comer'],
+      'literatura': ['literaria', 'literario', 'libros', 'escritor'],
+      'excursion': ['paseo', 'viaje', 'tour', 'ruta'],
+      'mar': ['oceano', 'costa', 'playa', 'maritimo'],
+      'montana': ['monte', 'cerro', 'colina', 'sierra'],
+      'cultura': ['cultural', 'tradicional', 'historia', 'historico'],
+      'naturaleza': ['natural', 'verde', 'paisaje', 'flora'],
+      'noche': ['nocturno', 'nocturna', 'evening'],
+      'dia': ['diurno', 'diurna', 'manana', 'tarde']
+    };
+    
+    // Agregar sinónimos si existen
+    Object.entries(synonyms).forEach(([key, values]) => {
+      if (normalized.includes(key)) {
+        terms.push(...values);
+      }
+      // También buscar en el sentido contrario
+      values.forEach(value => {
+        if (normalized.includes(normalizeSpanishText(value))) {
+          terms.push(key);
+        }
+      });
+    });
+    
+    return [...new Set(terms)]; // Remover duplicados
+  };
+
   const fetchExperiences = async () => {
     try {
       setLoading(true);
@@ -48,14 +93,24 @@ function HomePage() {
         data = await getExperiencesByCategory(activeFilter);
       }
       
-      // Apply search filter if search term exists
+      // Apply search filter if search term exists (intelligent Spanish search with synonyms)
       if (searchTerm.trim()) {
-        data = data.filter(experience => 
-          experience.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          experience.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (experience.location && experience.location.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          experience.category.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const searchTerms = createSpanishSearchTerms(searchTerm);
+        
+        data = data.filter(experience => {
+          const normalizedTitle = normalizeSpanishText(experience.title);
+          const normalizedDescription = normalizeSpanishText(experience.description);
+          const normalizedLocation = experience.location ? normalizeSpanishText(experience.location) : '';
+          const normalizedCategory = normalizeSpanishText(experience.category);
+          
+          // Buscar cualquier término de búsqueda en cualquier campo
+          return searchTerms.some(term => 
+            normalizedTitle.includes(term) ||
+            normalizedDescription.includes(term) ||
+            normalizedLocation.includes(term) ||
+            normalizedCategory.includes(term)
+          );
+        });
       }
       
       setExperiences(data);
