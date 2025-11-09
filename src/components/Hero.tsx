@@ -19,8 +19,13 @@ const destinations = [
   }
 ];
 
-export default function Hero() {
+interface HeroProps {
+  onSearch?: (searchTerm: string) => void;
+}
+
+export default function Hero({ onSearch }: HeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,6 +45,18 @@ export default function Hero() {
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
+  };
+
+  const handleSearch = () => {
+    if (searchTerm.trim() && onSearch) {
+      onSearch(searchTerm.trim());
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
@@ -78,10 +95,16 @@ export default function Hero() {
                     <input
                       type="text"
                       placeholder="¿Qué experiencia buscas?"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyPress={handleKeyPress}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
                     />
                   </div>
-                  <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md flex items-center space-x-2 transition-colors">
+                  <button 
+                    onClick={handleSearch}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md flex items-center space-x-2 transition-colors"
+                  >
                     <Search className="w-5 h-5" />
                     <span>Buscar</span>
                   </button>

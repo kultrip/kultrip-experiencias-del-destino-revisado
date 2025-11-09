@@ -15,10 +15,11 @@ function HomePage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchExperiences();
-  }, [activeFilter]);
+  }, [activeFilter, searchTerm]);
 
   useEffect(() => {
     // Listen for filter changes from header navigation
@@ -47,6 +48,16 @@ function HomePage() {
         data = await getExperiencesByCategory(activeFilter);
       }
       
+      // Apply search filter if search term exists
+      if (searchTerm.trim()) {
+        data = data.filter(experience => 
+          experience.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          experience.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (experience.location && experience.location.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          experience.category.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+      
       setExperiences(data);
     } catch (error) {
       console.error('Error fetching experiences:', error);
@@ -56,20 +67,46 @@ function HomePage() {
     }
   };
 
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    // The effect will trigger fetchExperiences when searchTerm changes
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <Hero />
+      <Hero onSearch={handleSearch} />
       <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">        
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Experiencias en Galicia
-          </h2>
-          <p className="text-lg text-gray-600">
-            Descubre los tesoros ocultos del noroeste de España con nuestras experiencias cuidadosamente seleccionadas
-          </p>
+          {searchTerm ? (
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Resultados de búsqueda para "{searchTerm}"
+              </h2>
+              <p className="text-lg text-gray-600">
+                {loading ? 'Buscando...' : `Se encontraron ${experiences.length} experiencias`}
+              </p>
+              {!loading && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="mt-2 text-orange-500 hover:text-orange-600 font-medium"
+                >
+                  ← Volver a todas las experiencias
+                </button>
+              )}
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Experiencias en Galicia
+              </h2>
+              <p className="text-lg text-gray-600">
+                Descubre los tesoros ocultos del noroeste de España con nuestras experiencias cuidadosamente seleccionadas
+              </p>
+            </div>
+          )}
         </div>
         
         {loading ? (
@@ -90,8 +127,19 @@ function HomePage() {
         {!loading && experiences.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
-              No se encontraron experiencias para esta categoría.
+              {searchTerm 
+                ? `No se encontraron experiencias que coincidan con "${searchTerm}".`
+                : 'No se encontraron experiencias para esta categoría.'
+              }
             </p>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
+              >
+                Ver todas las experiencias
+              </button>
+            )}
           </div>
         )}
       </main>
