@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import Stripe from 'stripe';
 import { Resend } from 'resend';
 
@@ -20,6 +21,9 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from dist directory (built React app)
+app.use(express.static('dist'));
 
 // Health check
 app.get('/health', (req, res) => {
@@ -216,6 +220,9 @@ app.post('/api/confirm-payment', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Serve React app for any route that doesn't match API endpoints
+// The static middleware above will handle this automatically
 
 app.listen(PORT, () => {
   console.log(`🚀 Stripe backend running on http://localhost:${PORT}`);
