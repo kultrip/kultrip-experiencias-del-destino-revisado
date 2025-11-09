@@ -71,8 +71,8 @@ export default function PaymentForm({
 
   const updateBookingStatus = async (bookingId: string, paymentIntentId: string) => {
     try {
-      // TODO: Call your backend to update booking status
-      const response = await fetch('/api/update-booking-payment', {
+      // Call Stripe backend to update booking status
+      const response = await fetch('http://localhost:3001/api/update-booking-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

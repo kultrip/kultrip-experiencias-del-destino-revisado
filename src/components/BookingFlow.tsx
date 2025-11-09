@@ -35,17 +35,19 @@ export default function BookingFlow({
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
 
-  const handleBookingSuccess = (bookingId: string, customerData?: any) => {
-    // You'll need to get the booking details from your booking service
-    // For now, we'll use mock data
+  const handleBookingSuccess = (bookingId: string, bookingData?: any) => {
+    console.log('Booking success with ID:', bookingId, 'and data:', bookingData);
+    
+    // Set booking data from the form response
     setBookingData({
       bookingId,
-      customerName: customerData?.name || 'Cliente',
-      customerEmail: customerData?.email || 'email@example.com',
-      totalAmount: basePrice ? basePrice * (minParticipants || 2) : 100,
-      experienceDate: customerData?.date || new Date().toISOString().split('T')[0],
-      participants: customerData?.participants || 2,
+      customerName: bookingData?.customerName || 'Cliente',
+      customerEmail: bookingData?.customerEmail || 'email@example.com',
+      totalAmount: bookingData?.totalAmount || (basePrice ? basePrice * (minParticipants || 2) : 100),
+      experienceDate: bookingData?.experienceDate || new Date().toISOString().split('T')[0],
+      participants: bookingData?.participants || minParticipants || 2,
     });
+    
     setCurrentStep('payment');
   };
 

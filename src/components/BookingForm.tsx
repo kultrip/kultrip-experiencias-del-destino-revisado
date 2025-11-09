@@ -10,7 +10,7 @@ interface BookingFormProps {
   basePrice?: number;
   minGroupSize?: number;
   minParticipants?: number;
-  onBookingSuccess?: (bookingId: string) => void;
+  onBookingSuccess?: (bookingId: string, bookingData?: any) => void;
 }
 
 export default function BookingForm({ 
@@ -171,8 +171,14 @@ export default function BookingForm({
           bookingNotes: ''
         });
         
-        // Callback for parent component
-        onBookingSuccess?.(result.booking.id);
+        // Callback for parent component with booking data
+        onBookingSuccess?.(result.booking.id, {
+          customerName: result.booking.customerName,
+          customerEmail: result.booking.customerEmail,
+          totalAmount: result.booking.totalAmount,
+          experienceDate: result.booking.experienceDate,
+          participants: result.booking.participants,
+        });
       }
     } catch (error) {
       console.error('Booking submission error:', error);

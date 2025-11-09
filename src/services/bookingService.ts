@@ -219,6 +219,7 @@ class BookingService {
           participants: request.participants,
           price_per_person: validation.pricePerPerson!,
           total_amount: validation.calculatedTotal,
+          total_price: validation.calculatedTotal,
           currency: 'EUR',
           status: 'pending',
           booking_notes: request.bookingNotes,

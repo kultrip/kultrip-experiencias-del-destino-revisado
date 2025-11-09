@@ -4,7 +4,7 @@ import { ArrowLeft, Clock, MapPin, Users, Star, CheckCircle, Phone, Mail } from 
 import { getExperienceById } from '../services/experienceService';
 import { Experience } from './ExperienceCard';
 import Header from './Header';
-import BookingForm from './BookingForm';
+import BookingFlow from './BookingFlow';
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -190,9 +190,12 @@ export default function ExperienceDetail() {
               {/* Booking Sidebar */}
               <div className="lg:col-span-1">
                 <div className="sticky top-8">
-                  <BookingForm 
+                  <BookingFlow 
                     experienceId={experience.id} 
                     experienceTitle={experience.title}
+                    basePrice={parseFloat(experience.price) || undefined}
+                    minGroupSize={experience.groupSize ? parseInt(experience.groupSize) : undefined}
+                    minParticipants={2}
                   />
                   
                   <div className="bg-orange-50 p-6 rounded-lg mt-6">
