@@ -9,6 +9,9 @@ export interface SupabaseExperience {
   duration: string;
   price: string;
   location?: string;
+  country?: string;
+  state?: string;
+  city?: string;
   schedule?: string;
   requirements?: string;
   category: string;
@@ -35,6 +38,9 @@ const mapSupabaseExperience = (dbExperience: SupabaseExperience): Experience => 
   duration: dbExperience.duration,
   price: dbExperience.price,
   location: dbExperience.location,
+  country: dbExperience.country,
+  state: dbExperience.state,
+  city: dbExperience.city,
   schedule: dbExperience.schedule,
   requirements: dbExperience.requirements,
   category: dbExperience.category,
@@ -100,6 +106,44 @@ export const getExperiencesByCategory = async (category: string): Promise<Experi
     return data?.map(mapSupabaseExperience) || [];
   } catch (error) {
     console.error('Error fetching experiences by category:', error);
+    throw error;
+  }
+};
+
+// Get experiences by state/region
+export const getExperiencesByState = async (state: string): Promise<Experience[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('experiences')
+      .select('*')
+      .eq('state', state)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data?.map(mapSupabaseExperience) || [];
+  } catch (error) {
+    console.error('Error fetching experiences by state:', error);
+    throw error;
+  }
+};
+
+// Get experiences by city
+export const getExperiencesByCity = async (city: string): Promise<Experience[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('experiences')
+      .select('*')
+      .eq('city', city)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data?.map(mapSupabaseExperience) || [];
+  } catch (error) {
+    console.error('Error fetching experiences by city:', error);
     throw error;
   }
 };

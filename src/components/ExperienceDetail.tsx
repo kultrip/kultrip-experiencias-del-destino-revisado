@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, MapPin, Users, Star, CheckCircle, Phone, Mail, Calendar, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, Users, Star, CheckCircle, Phone, Mail } from 'lucide-react';
 import { getExperienceById } from '../services/experienceService';
 import { Experience } from './ExperienceCard';
 import Header from './Header';
+import BookingForm from './BookingForm';
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -28,15 +29,7 @@ export default function ExperienceDetail() {
     fetchExperience();
   }, [id]);
   
-  const [selectedDate, setSelectedDate] = useState('');
-  const [participants, setParticipants] = useState(2);
-  const [showBookingForm, setShowBookingForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: ''
-  });
+
 
   if (loading) {
     return (
@@ -67,24 +60,7 @@ export default function ExperienceDetail() {
     );
   }
 
-  const handleSubmitBooking = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`¡Gracias ${formData.name}! Hemos recibido tu solicitud de reserva para "${experience.title}" el ${selectedDate} para ${participants} personas. Te contactaremos pronto para confirmar los detalles.`);
-    setShowBookingForm(false);
-    setFormData({ name: '', email: '', phone: '', message: '' });
-  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  // Get tomorrow's date as minimum selectable date
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -213,149 +189,13 @@ export default function ExperienceDetail() {
 
               {/* Booking Sidebar */}
               <div className="lg:col-span-1">
-                <div className="bg-orange-50 p-6 rounded-lg sticky top-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Reservar experiencia</h3>
+                <div className="sticky top-8">
+                  <BookingForm 
+                    experienceId={experience.id} 
+                    experienceTitle={experience.title}
+                  />
                   
-                  {!showBookingForm ? (
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Fecha de la experiencia
-                        </label>
-                        <input
-                          type="date"
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          min={minDate}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Número de participantes
-                        </label>
-                        <div className="flex items-center justify-between bg-white border border-gray-300 rounded-lg px-4 py-3">
-                          <button
-                            type="button"
-                            onClick={() => setParticipants(Math.max(1, participants - 1))}
-                            className="text-orange-500 hover:text-orange-600"
-                          >
-                            <Minus className="w-5 h-5" />
-                          </button>
-                          <span className="text-lg font-semibold">{participants}</span>
-                          <button
-                            type="button"
-                            onClick={() => setParticipants(participants + 1)}
-                            className="text-orange-500 hover:text-orange-600"
-                          >
-                            <Plus className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="border-t pt-4">
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-lg font-semibold">Total estimado:</span>
-                          <span className="text-2xl font-bold text-orange-600">{experience.price}</span>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                          *El precio final puede variar según la fecha y número de participantes
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => setShowBookingForm(true)}
-                        disabled={!selectedDate}
-                        className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 px-6 rounded-lg font-semibold text-lg transition-colors"
-                      >
-                        Continuar con la reserva
-                      </button>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleSubmitBooking} className="space-y-4">
-                      <div className="bg-white p-4 rounded-lg mb-4">
-                        <h4 className="font-semibold mb-2">Resumen de tu reserva:</h4>
-                        <p className="text-sm text-gray-600">Fecha: {selectedDate}</p>
-                        <p className="text-sm text-gray-600">Participantes: {participants}</p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Nombre completo *
-                        </label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Email *
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Teléfono *
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Mensaje adicional
-                        </label>
-                        <textarea
-                          name="message"
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          placeholder="Cualquier solicitud especial o pregunta..."
-                        />
-                      </div>
-
-                      <div className="flex space-x-3">
-                        <button
-                          type="button"
-                          onClick={() => setShowBookingForm(false)}
-                          className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors"
-                        >
-                          Atrás
-                        </button>
-                        <button
-                          type="submit"
-                          className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
-                        >
-                          Enviar solicitud
-                        </button>
-                      </div>
-                    </form>
-                  )}
-
-                  <div className="mt-8 pt-6 border-t border-orange-200">
+                  <div className="bg-orange-50 p-6 rounded-lg mt-6">
                     <h4 className="font-semibold text-gray-900 mb-3">¿Necesitas ayuda?</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center text-gray-700">

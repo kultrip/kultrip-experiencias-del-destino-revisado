@@ -10,6 +10,9 @@ export interface Experience {
   duration: string;
   price: string;
   location?: string;
+  country?: string;
+  state?: string;
+  city?: string;
   schedule?: string;
   requirements?: string;
   category: string;

@@ -9,7 +9,7 @@ import ContactSection from './components/ContactSection';
 import ExperienceDetail from './components/ExperienceDetail';
 import UserProfile from './components/UserProfile';
 import UserDashboard from './components/UserDashboard';
-import { getExperiences, getExperiencesByCategory } from './services/experienceService';
+import { getExperiences, getExperiencesByCategory, getExperiencesByState } from './services/experienceService';
 
 function HomePage() {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -27,7 +27,10 @@ function HomePage() {
       
       if (activeFilter === 'all') {
         data = await getExperiences();
+      } else if (activeFilter === 'galicia') {
+        data = await getExperiencesByState('Galicia');
       } else {
+        // For category filters (sunset, gastronomy, literary, daytrips)
         data = await getExperiencesByCategory(activeFilter);
       }
       
@@ -46,7 +49,7 @@ function HomePage() {
       <Hero />
       <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">        
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Experiencias en Galicia

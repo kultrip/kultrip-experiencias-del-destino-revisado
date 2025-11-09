@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Menu, Phone, Mail, Clock, User, LogOut, Settings, Heart, Calendar, Shield, MapPin } from 'lucide-react';
+import { Menu, Phone, Mail, Clock, User, LogOut, Settings, Heart, Calendar, Shield, MapPin, Receipt, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
 import { AdminManagement } from './AdminManagement';
 import { AdminExperienceManager } from './AdminExperienceManager';
+import { BookingManager } from './BookingManager';
 
 export default function Header() {
   const { user, signOut } = useAuth();
@@ -12,6 +13,7 @@ export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showExperienceManager, setShowExperienceManager] = useState(false);
+  const [showBookingManager, setShowBookingManager] = useState(false);
 
   const handleAuthClick = (mode: 'signin' | 'signup') => {
     setAuthMode(mode);
@@ -156,6 +158,13 @@ export default function Header() {
                             <MapPin className="w-4 h-4 mr-3" />
                             Gestión Experiencias
                           </button>
+                          <button
+                            onClick={() => setShowBookingManager(true)}
+                            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-600"
+                          >
+                            <Receipt className="w-4 h-4 mr-3" />
+                            Gestión Reservas
+                          </button>
                         </>
                       )}
                       <div className="border-t border-gray-200 mt-2 pt-2">
@@ -199,6 +208,26 @@ export default function Header() {
         <AdminExperienceManager
           onClose={() => setShowExperienceManager(false)}
         />
+      )}
+      
+      {/* Booking Management Modal */}
+      {showBookingManager && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full h-full max-w-7xl max-h-[95vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-bold">Gestión de Reservas</h2>
+              <button
+                onClick={() => setShowBookingManager(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="h-full overflow-y-auto">
+              <BookingManager />
+            </div>
+          </div>
+        </div>
       )}
     </header>
   );
