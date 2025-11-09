@@ -1,2 +1,24 @@
+# Dependencies
 node_modules/
+
+# Environment variables (contains API keys)
 .env
+.env.local
+.env.production
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+server.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

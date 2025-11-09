@@ -174,6 +174,10 @@ export default function PaymentPage({
             <Elements options={options} stripe={stripePromise}>
               <PaymentForm
                 bookingId={bookingId}
+                experienceTitle={experienceTitle}
+                amount={amount}
+                customerEmail={customerEmail}
+                customerName={customerName}
                 onSuccess={onPaymentSuccess}
                 onError={onPaymentError}
               />

@@ -9,12 +9,20 @@ import { CheckCircle, AlertCircle, CreditCard } from 'lucide-react';
 
 interface PaymentFormProps {
   bookingId: string;
+  experienceTitle: string;
+  amount: number;
+  customerEmail: string;
+  customerName: string;
   onSuccess?: (paymentId: string) => void;
   onError?: (error: string) => void;
 }
 
 export default function PaymentForm({
   bookingId,
+  experienceTitle,
+  amount,
+  customerEmail,
+  customerName,
   onSuccess,
   onError,
 }: PaymentFormProps) {
@@ -57,6 +65,9 @@ export default function PaymentForm({
         // Update booking status in your database
         await updateBookingStatus(bookingId, paymentIntent.id);
         
+        // Send confirmation email
+        await sendConfirmationEmail(bookingId, paymentIntent.id);
+        
         onSuccess?.(paymentIntent.id);
       }
     } catch (err) {
@@ -89,6 +100,41 @@ export default function PaymentForm({
       }
     } catch (error) {
       console.error('Error updating booking status:', error);
+    }
+  };
+
+  const sendConfirmationEmail = async (bookingId: string, paymentIntentId: string) => {
+    try {
+      console.log('Sending confirmation email for booking:', bookingId);
+      
+      const response = await fetch('http://localhost:3001/api/send-confirmation-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bookingData: {
+            bookingId,
+            experienceTitle,
+            experienceDate: new Date().toISOString(),
+            participants: 2, // You might want to pass this as a prop
+            totalAmount: amount,
+            paymentIntentId
+          },
+          customerEmail,
+          customerName
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send confirmation email');
+      }
+
+      const result = await response.json();
+      console.log('Confirmation email sent:', result);
+    } catch (error) {
+      console.error('Error sending confirmation email:', error);
+      // Don't fail the payment if email fails
     }
   };
 
