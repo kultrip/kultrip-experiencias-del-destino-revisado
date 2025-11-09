@@ -221,8 +221,10 @@ app.post('/api/confirm-payment', async (req, res) => {
   }
 });
 
-// Serve React app for any route that doesn't match API endpoints
-// The static middleware above will handle this automatically
+// Catch-all handler: send back React's index.html file for any non-API routes
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.resolve(process.cwd(), 'dist', 'index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Kultrip Experiencias backend running on port ${PORT}`);
