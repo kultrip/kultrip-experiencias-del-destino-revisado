@@ -107,6 +107,45 @@ export default function BookingForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check if this is a cotización personalizada case
+    const requiresQuotation = validation?.errors?.some(error => 
+      error.includes('cotización personalizada')
+    );
+
+    if (requiresQuotation) {
+      // Handle quotation request
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      try {
+        // For now, we'll simulate the quotation request
+        // In a real implementation, this would save to a quotations table or send an email
+        // with the formData containing all the customer information and requirements
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+        
+        setSubmitSuccess(
+          `¡Solicitud de cotización enviada! Te contactaremos dentro de las próximas 24 horas para proporcionarte una cotización personalizada. Referencia: COT-${Date.now().toString().slice(-6)}`
+        );
+        
+        // Reset form
+        setFormData({
+          ...formData,
+          experienceDate: '',
+          participants: minParticipants || 2,
+          specialRequirements: '',
+          bookingNotes: ''
+        });
+        
+      } catch (error) {
+        console.error('Quotation submission error:', error);
+        setSubmitError('Error al enviar la solicitud de cotización. Por favor inténtalo de nuevo.');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // Regular booking flow
     if (!validation || !validation.isValid) {
       setSubmitError('Por favor corrige los errores antes de enviar');
       return;
@@ -355,18 +394,24 @@ export default function BookingForm({
           disabled={
             isSubmitting || 
             isValidating || 
-            !validation?.isValid || 
+            (!validation?.isValid && !validation?.errors?.some(error => error.includes('cotización personalizada'))) || 
             !formData.experienceDate ||
             !formData.customerName ||
             !formData.customerEmail
           }
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 px-6 rounded-lg font-semibold text-lg transition-colors"
         >
-          {isSubmitting ? 'Procesando...' : 'Crear reserva'}
+          {isSubmitting ? 'Procesando...' : 
+           validation?.errors?.some(error => error.includes('cotización personalizada')) 
+             ? 'Solicitar cotización' 
+             : 'Crear reserva'}
         </button>
 
         <div className="text-xs text-gray-500 text-center">
-          Al hacer la reserva, recibirás un email de confirmación. El pago se procesará en el siguiente paso.
+          {validation?.errors?.some(error => error.includes('cotización personalizada')) 
+            ? 'Nuestro equipo te contactará dentro de 24 horas con una cotización personalizada.'
+            : 'Al hacer la reserva, recibirás un email de confirmación. El pago se procesará en el siguiente paso.'
+          }
         </div>
       </form>
     </div>

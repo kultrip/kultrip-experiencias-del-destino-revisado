@@ -20,6 +20,19 @@ function HomePage() {
     fetchExperiences();
   }, [activeFilter]);
 
+  useEffect(() => {
+    // Listen for filter changes from header navigation
+    const handleFilterChange = (event: CustomEvent) => {
+      setActiveFilter(event.detail);
+    };
+
+    window.addEventListener('filterChange', handleFilterChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('filterChange', handleFilterChange as EventListener);
+    };
+  }, []);
+
   const fetchExperiences = async () => {
     try {
       setLoading(true);
@@ -97,19 +110,60 @@ function HomePage() {
             <div>
               <h4 className="font-semibold mb-4">Experiencias</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Atardeceres</a></li>
-                <li><a href="#" className="hover:text-white">Gastronomía</a></li>
-                <li><a href="#" className="hover:text-white">Rutas Literarias</a></li>
-                <li><a href="#" className="hover:text-white">Excursiones</a></li>
+                <li>
+                  <button 
+                    onClick={() => setActiveFilter('sunset')} 
+                    className="hover:text-white text-left"
+                  >
+                    Atardeceres
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => setActiveFilter('gastronomy')} 
+                    className="hover:text-white text-left"
+                  >
+                    Gastronomía
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => setActiveFilter('literary')} 
+                    className="hover:text-white text-left"
+                  >
+                    Rutas Literarias
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => setActiveFilter('daytrips')} 
+                    className="hover:text-white text-left"
+                  >
+                    Excursiones
+                  </button>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Destinos</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Fisterra</a></li>
-                <li><a href="#" className="hover:text-white">Ribeira Sacra</a></li>
-                <li><a href="#" className="hover:text-white">Rías Baixas</a></li>
-                <li><a href="#" className="hover:text-white">Costa da Morte</a></li>
+                <li>
+                  <button 
+                    onClick={() => setActiveFilter('galicia')} 
+                    className="hover:text-white text-left"
+                  >
+                    Galicia
+                  </button>
+                </li>
+                <li>
+                  <span className="text-gray-500">Fisterra (próximamente)</span>
+                </li>
+                <li>
+                  <span className="text-gray-500">Ribeira Sacra (próximamente)</span>
+                </li>
+                <li>
+                  <span className="text-gray-500">Rías Baixas (próximamente)</span>
+                </li>
               </ul>
             </div>
             <div>
