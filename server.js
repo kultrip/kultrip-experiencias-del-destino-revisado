@@ -225,7 +225,8 @@ app.post('/api/confirm-payment', async (req, res) => {
 // The static middleware above will handle this automatically
 
 app.listen(PORT, () => {
-  console.log(`🚀 Stripe backend running on http://localhost:${PORT}`);
+  console.log(`🚀 Kultrip Experiencias backend running on port ${PORT}`);
   console.log('💳 Ready to process payments with Stripe');
+  console.log('📧 Email confirmations with Resend');
   console.log('🧪 Use test card: 4242 4242 4242 4242');
 });
