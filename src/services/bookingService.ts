@@ -102,14 +102,14 @@ class BookingService {
 
       if (error || !experience) {
         validation.isValid = false;
-        validation.errors.push('Experience not found or not available');
+        validation.errors.push('Experiencia no encontrada o no disponible');
         return validation;
       }
 
       // Check if experience has pricing
       if (!experience.price_per_person) {
         validation.isValid = false;
-        validation.errors.push('Experience requires custom pricing - please contact us');
+        validation.errors.push('Esta experiencia requiere cotización personalizada - por favor contáctanos');
         return validation;
       }
 
@@ -119,7 +119,7 @@ class BookingService {
       if (experience.min_participants && request.participants < experience.min_participants) {
         validation.isValid = false;
         validation.errors.push(
-          `Minimum ${experience.min_participants} participants required for this experience`
+          `Se requiere un mínimo de ${experience.min_participants} participantes para esta experiencia`
         );
         validation.minimumParticipants = experience.min_participants;
       }
@@ -135,7 +135,7 @@ class BookingService {
       // Add warning if charging for minimum group size
       if (experience.min_group_size && request.participants < experience.min_group_size) {
         validation.warnings.push(
-          `Price calculated for minimum group size of ${experience.min_group_size} people`
+          `Precio calculado para un grupo mínimo de ${experience.min_group_size} personas`
         );
       }
 
@@ -146,7 +146,7 @@ class BookingService {
 
       if (experienceDate < today) {
         validation.isValid = false;
-        validation.errors.push('Experience date cannot be in the past');
+        validation.errors.push('La fecha de la experiencia no puede ser en el pasado');
       }
 
       // Check if date is too soon (less than 24 hours)
@@ -154,26 +154,32 @@ class BookingService {
       tomorrow.setDate(tomorrow.getDate() + 1);
       
       if (experienceDate < tomorrow) {
-        validation.warnings.push('Booking for tomorrow may require special confirmation');
+        validation.warnings.push('Las reservas para mañana pueden requerir confirmación especial');
       }
 
       // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(request.customerEmail)) {
+      const email = request.customerEmail?.trim() || '';
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      
+      if (!email) {
         validation.isValid = false;
-        validation.errors.push('Please provide a valid email address');
+        validation.errors.push('El email es obligatorio');
+      } else if (!emailRegex.test(email)) {
+        console.log('Email validation failed for:', email); // Debug log
+        validation.isValid = false;
+        validation.errors.push('Por favor proporciona una dirección de correo electrónico válida');
       }
 
       // Validate participants count
       if (request.participants < 1 || request.participants > 50) {
         validation.isValid = false;
-        validation.errors.push('Number of participants must be between 1 and 50');
+        validation.errors.push('El número de participantes debe estar entre 1 y 50');
       }
 
     } catch (error) {
       console.error('Error validating booking:', error);
       validation.isValid = false;
-      validation.errors.push('Error validating booking request');
+      validation.errors.push('Error al validar la solicitud de reserva');
     }
 
     return validation;
@@ -224,14 +230,14 @@ class BookingService {
 
       if (error) {
         console.error('Error creating booking:', error);
-        return { error: 'Failed to create booking' };
+        return { error: 'Error al crear la reserva' };
       }
 
       return { booking: this.mapBookingFromDB(booking) };
 
     } catch (error) {
       console.error('Error in createBooking:', error);
-      return { error: 'Unexpected error creating booking' };
+      return { error: 'Error inesperado al crear la reserva' };
     }
   }
 
@@ -245,7 +251,7 @@ class BookingService {
 
       if (error) {
         console.error('Error fetching user bookings:', error);
-        return { error: 'Failed to fetch bookings' };
+        return { error: 'Error al obtener las reservas' };
       }
 
       const bookings = data.map(this.mapBookingFromDB);
@@ -253,7 +259,7 @@ class BookingService {
 
     } catch (error) {
       console.error('Error in getUserBookings:', error);
-      return { error: 'Unexpected error fetching bookings' };
+      return { error: 'Error inesperado al obtener las reservas' };
     }
   }
 
@@ -267,7 +273,7 @@ class BookingService {
 
       if (error) {
         console.error('Error fetching all bookings:', error);
-        return { error: 'Failed to fetch bookings' };
+        return { error: 'Error al obtener las reservas' };
       }
 
       const bookings = data.map(this.mapBookingFromDB);
@@ -275,7 +281,7 @@ class BookingService {
 
     } catch (error) {
       console.error('Error in getAllBookings:', error);
-      return { error: 'Unexpected error fetching bookings' };
+      return { error: 'Error inesperado al obtener las reservas' };
     }
   }
 
@@ -306,14 +312,14 @@ class BookingService {
 
       if (error) {
         console.error('Error updating booking status:', error);
-        return { success: false, error: 'Failed to update booking status' };
+        return { success: false, error: 'Error al actualizar el estado de la reserva' };
       }
 
       return { success: true };
 
     } catch (error) {
       console.error('Error in updateBookingStatus:', error);
-      return { success: false, error: 'Unexpected error updating booking' };
+      return { success: false, error: 'Error inesperado al actualizar la reserva' };
     }
   }
 
@@ -330,40 +336,43 @@ class BookingService {
     error?: string;
   }> {
     try {
-      const { data, error } = await supabase
-        .rpc('calculate_booking_total', {
-          experience_uuid: experienceId,
-          participant_count: participants
-        });
-
-      if (error) {
-        console.error('Error calculating price:', error);
-        return { error: 'Failed to calculate price' };
-      }
-
-      // Get experience details for breakdown
-      const { data: experience } = await supabase
+      // Get experience details for price calculation
+      const { data: experience, error } = await supabase
         .from('experiences')
-        .select('price_per_person, min_group_size')
+        .select('price_per_person, min_group_size, min_participants')
         .eq('id', experienceId)
+        .eq('status', 'active')
         .single();
 
-      if (!experience) {
-        return { error: 'Experience not found' };
+      if (error || !experience) {
+        console.error('Error fetching experience for pricing:', error);
+        return { error: 'Experiencia no encontrada' };
       }
 
-      const pricePerPerson = parseFloat(experience.price_per_person || '0');
-      const effectiveParticipants = Math.max(participants, experience.min_group_size || 1);
+      // Check if experience has pricing
+      if (!experience.price_per_person) {
+        return { error: 'Esta experiencia requiere cotización personalizada - por favor contáctanos' };
+      }
+
+      const pricePerPerson = parseFloat(experience.price_per_person);
+      
+      // Calculate effective participants (considering minimum group size)
+      const effectiveParticipants = Math.max(
+        participants, 
+        experience.min_group_size || 1
+      );
+      
+      const totalAmount = pricePerPerson * effectiveParticipants;
       
       return {
         pricePerPerson,
-        totalAmount: parseFloat(data || '0'),
+        totalAmount,
         effectiveParticipants
       };
 
     } catch (error) {
       console.error('Error in calculatePrice:', error);
-      return { error: 'Unexpected error calculating price' };
+      return { error: 'Error inesperado al calcular el precio' };
     }
   }
 

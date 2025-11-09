@@ -51,10 +51,10 @@ export default function BookingForm({
 
   // Real-time validation when key fields change
   useEffect(() => {
-    if (formData.experienceDate && formData.participants > 0) {
+    if (formData.experienceDate && formData.participants > 0 && formData.customerEmail.trim()) {
       validateBookingRequest();
     }
-  }, [formData.experienceDate, formData.participants]);
+  }, [formData.experienceDate, formData.participants, formData.customerEmail]);
 
   // Calculate price when participants change
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function BookingForm({
     e.preventDefault();
     
     if (!validation || !validation.isValid) {
-      setSubmitError('Please fix the errors before submitting');
+      setSubmitError('Por favor corrige los errores antes de enviar');
       return;
     }
 
@@ -121,7 +121,7 @@ export default function BookingForm({
       if (result.error) {
         setSubmitError(result.error);
       } else if (result.booking) {
-        setSubmitSuccess(`Booking created successfully! Reference: ${result.booking.id.slice(0, 8)}`);
+        setSubmitSuccess(`¡Reserva creada exitosamente! Referencia: ${result.booking.id.slice(0, 8)}`);
         
         // Reset form
         setFormData({
@@ -137,7 +137,7 @@ export default function BookingForm({
       }
     } catch (error) {
       console.error('Booking submission error:', error);
-      setSubmitError('An unexpected error occurred. Please try again.');
+      setSubmitError('Ocurrió un error inesperado. Por favor inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
