@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, MapPin, Users, Star, CheckCircle, Phone, Mail, Calendar, Minus, Plus } from 'lucide-react';
-import { experiences } from '../data/experiences';
+import { getExperienceById } from '../services/experienceService';
+import { Experience } from './ExperienceCard';
 import Header from './Header';
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>();
-  const experience = experiences.find(exp => exp.id === id);
+  const [experience, setExperience] = useState<Experience | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExperience = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const data = await getExperienceById(id);
+        setExperience(data);
+      } catch (error) {
+        console.error('Error fetching experience:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExperience();
+  }, [id]);
   
   const [selectedDate, setSelectedDate] = useState('');
   const [participants, setParticipants] = useState(2);
@@ -17,6 +37,19 @@ export default function ExperienceDetail() {
     phone: '',
     message: ''
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!experience) {
     return (

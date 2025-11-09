@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import FilterBar from './components/FilterBar';
 import ExperienceCard, { Experience } from './components/ExperienceCard';
 import ContactSection from './components/ContactSection';
 import ExperienceDetail from './components/ExperienceDetail';
-import { experiences } from './data/experiences';
+import UserProfile from './components/UserProfile';
+import UserDashboard from './components/UserDashboard';
+import { getExperiences, getExperiencesByCategory } from './services/experienceService';
 
 function HomePage() {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredExperiences = experiences.filter(experience => {
-    if (activeFilter === 'all') return true;
-    return experience.category === activeFilter;
-  });
+  useEffect(() => {
+    fetchExperiences();
+  }, [activeFilter]);
+
+  const fetchExperiences = async () => {
+    try {
+      setLoading(true);
+      let data: Experience[];
+      
+      if (activeFilter === 'all') {
+        data = await getExperiences();
+      } else {
+        data = await getExperiencesByCategory(activeFilter);
+      }
+      
+      setExperiences(data);
+    } catch (error) {
+      console.error('Error fetching experiences:', error);
+      setExperiences([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -32,16 +56,22 @@ function HomePage() {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredExperiences.map((experience) => (
-            <ExperienceCard 
-              key={experience.id} 
-              experience={experience}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {experiences.map((experience) => (
+              <ExperienceCard 
+                key={experience.id} 
+                experience={experience}
+              />
+            ))}
+          </div>
+        )}
         
-        {filteredExperiences.length === 0 && (
+        {!loading && experiences.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
               No se encontraron experiencias para esta categoría.
@@ -99,10 +129,14 @@ function HomePage() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/experience/:id" element={<ExperienceDetail />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/experience/:id" element={<ExperienceDetail />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/dashboard" element={<UserDashboard />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
